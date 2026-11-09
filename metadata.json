@@ -1,0 +1,6 @@
+{
+  "name": "Butt Murgh Channay & Fish Corner",
+  "description": "Authentic Lahori Murgh Channay and Crispy Fried Fish in Badami Bagh, Lahore. Order fresh food with instant WhatsApp delivery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

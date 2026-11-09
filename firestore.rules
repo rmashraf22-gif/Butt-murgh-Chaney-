@@ -1,0 +1,76 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all undefined paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions for server-side authorization
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnerEmail() {
+      return isSignedIn() &&
+             request.auth.token.email == 'rmashraf22@gmail.com';
+    }
+
+    function isAuthorizedAdmin() {
+      return isOwnerEmail() ||
+             (isSignedIn() && (
+               exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+               (request.auth.token.email != null && exists(/databases/$(database)/documents/admins/$(request.auth.token.email)))
+             ));
+    }
+
+    // 1. Menu Items: Public customers can read dishes; ONLY authenticated admins can write (create, edit, delete)
+    match /menu_items/{itemId} {
+      allow read: if true;
+      allow write: if isAuthorizedAdmin();
+    }
+
+    // 2. Settings & Announcements: Public read; admin-only write
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAuthorizedAdmin();
+    }
+
+    // 3. Customer Reviews: Public read; validated submission; admin-only moderation
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.resource.data.rating >= 1 
+                    && request.resource.data.rating <= 5 
+                    && request.resource.data.name is string 
+                    && request.resource.data.comment is string;
+      allow update, delete: if isAuthorizedAdmin();
+    }
+
+    // 4. Customer Orders: Customers can submit orders, but customer PII (phone numbers, addresses) can ONLY be read by authenticated staff
+    match /orders/{orderId} {
+      allow read: if isAuthorizedAdmin();
+      allow create: if request.resource.data.keys().hasAll(['orderNumber', 'orderType', 'items', 'totalAmount', 'status', 'createdAt'])
+                    && request.resource.data.status == 'pending';
+      allow update, delete: if isAuthorizedAdmin();
+    }
+
+    // 5. Admins list: Only authorized staff can view team; only Owner can grant or revoke admin privileges
+    match /admins/{adminId} {
+      allow read: if isAuthorizedAdmin();
+      allow write: if isOwnerEmail();
+    }
+
+    // 6. Data Backups: Only authorized admins can view, archive, or restore system backups
+    match /backups/{backupId} {
+      allow read, write: if isAuthorizedAdmin();
+    }
+
+    // 7. Connectivity test probe
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if isAuthorizedAdmin();
+    }
+  }
+}

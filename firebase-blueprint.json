@@ -1,0 +1,123 @@
+{
+  "entities": {
+    "MenuItem": {
+      "title": "MenuItem",
+      "description": "Menu dish offering for Butt Murgh Channay & Fish Corner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "nameUrdu": { "type": "string" },
+        "category": { "type": "string", "enum": ["chanay_specials", "tandoor", "sides", "beverages", "fish"] },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "originalPrice": { "type": "number" },
+        "image": { "type": "string" },
+        "serving": { "type": "string" },
+        "tag": { "type": "string" },
+        "isAvailable": { "type": "boolean" },
+        "isSpecial": { "type": "boolean" }
+      },
+      "required": ["id", "name", "category", "price", "description", "image", "isAvailable"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Customer feedback and star rating review",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "location": { "type": "string", "maxLength": 100 },
+        "rating": { "type": "number" },
+        "comment": { "type": "string", "maxLength": 1000 },
+        "favoriteDish": { "type": "string", "maxLength": 100 },
+        "date": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["name", "rating", "comment", "favoriteDish"]
+    },
+    "Setting": {
+      "title": "Setting",
+      "description": "Store settings and announcement notices",
+      "type": "object",
+      "properties": {
+        "dailyNotice": { "type": "string" }
+      }
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Live customer orders submitted via WhatsApp checkout",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "deliveryAddress": { "type": "string" },
+        "specialInstructions": { "type": "string" },
+        "orderType": { "type": "string", "enum": ["delivery", "takeaway", "dinein"] },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "preparing", "dispatched", "completed", "cancelled"] },
+        "createdAt": { "type": "number" },
+        "formattedTime": { "type": "string" }
+      },
+      "required": ["orderNumber", "orderType", "items", "totalAmount", "status", "createdAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized restaurant manager or kitchen staff",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["owner", "manager", "dispatcher", "kitchen_staff"] },
+        "name": { "type": "string" },
+        "addedAt": { "type": "string" }
+      },
+      "required": ["email", "role"]
+    },
+    "Backup": {
+      "title": "Backup",
+      "description": "System database snapshot archive for disaster recovery",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "createdBy": { "type": "string" },
+        "menuCount": { "type": "number" },
+        "ordersCount": { "type": "number" },
+        "payloadJson": { "type": "string" }
+      },
+      "required": ["id", "createdAt", "payloadJson"]
+    }
+  },
+  "firestore": {
+    "/menu_items/{itemId}": {
+      "schema": { "$ref": "#/entities/MenuItem" },
+      "description": "Collection of all live restaurant dishes"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Customer ratings and reviews"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/Setting" },
+      "description": "Store settings and announcements"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Customer orders collection for live admin kitchen notifications"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Authorized administrators list"
+    },
+    "/backups/{backupId}": {
+      "schema": { "$ref": "#/entities/Backup" },
+      "description": "Cloud backup archive snapshots"
+    }
+  }
+}
