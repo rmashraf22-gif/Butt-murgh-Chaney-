@@ -482,7 +482,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       const unsub = onSnapshot(
         collection(db, 'backups'),
         (snap) => {
-          const items = snap.docs.map((d) => d.data() as any);
+          const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as any);
           items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
           setCloudBackups(items);
         },
@@ -612,13 +612,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     try {
       setIsBackingUp(true);
       const menuSnap = await getDocs(collection(db, 'menu_items'));
-      const liveMenu = menuSnap.docs.map((d) => d.data() as MenuItem);
+      const liveMenu = menuSnap.docs.map((d) => ({ ...(d.data() as MenuItem), id: d.id }));
       const ordersSnap = await getDocs(collection(db, 'orders'));
-      const liveOrders = ordersSnap.docs.map((d) => d.data() as CustomerOrder);
+      const liveOrders = ordersSnap.docs.map((d) => ({ ...(d.data() as CustomerOrder), id: d.id }));
       const settingsSnap = await getDoc(doc(db, 'settings', 'general'));
       const settingsData = settingsSnap.exists() ? settingsSnap.data() : { dailyNotice };
       const adminSnap = await getDocs(collection(db, 'admins'));
-      const adminDocs = adminSnap.docs.map((d) => d.data());
+      const adminDocs = adminSnap.docs.map((d) => ({ ...d.data(), id: d.id }));
 
       const backupPayload = {
         version: '2.0',
@@ -668,9 +668,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     try {
       setIsBackingUp(true);
       const menuSnap = await getDocs(collection(db, 'menu_items'));
-      const liveMenu = menuSnap.docs.map((d) => d.data() as MenuItem);
+      const liveMenu = menuSnap.docs.map((d) => ({ ...(d.data() as MenuItem), id: d.id }));
       const ordersSnap = await getDocs(collection(db, 'orders'));
-      const liveOrders = ordersSnap.docs.map((d) => d.data() as CustomerOrder);
+      const liveOrders = ordersSnap.docs.map((d) => ({ ...(d.data() as CustomerOrder), id: d.id }));
       const settingsSnap = await getDoc(doc(db, 'settings', 'general'));
       const settingsData = settingsSnap.exists() ? settingsSnap.data() : { dailyNotice };
 
@@ -1605,9 +1605,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {filteredOrders.map((order) => {
+                  {filteredOrders.map((order, orderIdx) => {
                     const isConfirmingDelete = deleteOrderConfirmId === order.id;
-                    const cleanPhone = order.customerPhone.replace(/[^0-9]/g, '');
+                    const cleanPhone = (order.customerPhone || '').replace(/[^0-9]/g, '');
                     const effectiveMapUrl =
                       order.customerGpsMapUrl ||
                       (order.deliveryAddress
@@ -1618,7 +1618,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                     return (
                       <div
-                        key={order.id}
+                        key={order.id || order.orderNumber || `order-${order.createdAt || ''}-${orderIdx}`}
                         className={`bg-[#151724] border rounded-xl p-4 space-y-4 transition-colors shadow-sm ${
                           order.status === 'pending'
                             ? 'border-amber-600/70 ring-1 ring-amber-500/20'
@@ -1696,9 +1696,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                 <span className="text-[10px] text-stone-400 font-normal">Line Total</span>
                               </div>
                               <div className="divide-y divide-stone-850 flex-1">
-                                {order.items.map((it, idx) => (
+                                {(order.items || []).map((it, idx) => (
                                   <div
-                                    key={idx}
+                                    key={it.dishId ? `${it.dishId}-${idx}` : `item-${it.name || ''}-${idx}`}
                                     className="p-2.5 flex items-center justify-between text-xs hover:bg-stone-900/30 transition-colors"
                                   >
                                     <div className="flex items-center gap-2.5 min-w-0">
@@ -2069,12 +2069,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   </div>
                 ) : (
                   <div className="space-y-2.5">
-                  {draftItems.map((item) => {
+                  {draftItems.map((item, idx) => {
                     const isConfirmingDelete = deleteConfirmId === item.id;
 
                     return (
                       <div
-                        key={item.id}
+                        key={item.id || `dish-${item.name || ''}-${idx}`}
                         className={`bg-[#151724] border rounded-xl p-3.5 flex flex-col gap-3 transition-colors ${
                           isConfirmingDelete ? 'border-red-600/80 bg-red-950/20' : 'border-stone-800/80'
                         }`}
@@ -2704,9 +2704,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
 
                 <div className="space-y-2.5">
-                  {adminTeam.map((admin) => (
+                  {adminTeam.map((admin, idx) => (
                     <div
-                      key={admin.id}
+                      key={admin.id || admin.email || `admin-${idx}`}
                       className="bg-[#141624] border border-stone-800 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -3081,9 +3081,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   </div>
                 ) : (
                   <div className="divide-y divide-stone-850 max-h-60 overflow-y-auto">
-                    {cloudBackups.map((snap) => (
+                    {cloudBackups.map((snap, idx) => (
                       <div
-                        key={snap.id}
+                        key={snap.id || `backup-${snap.createdAt || snap.createdAtFormatted || idx}`}
                         className="p-3 flex items-center justify-between text-xs hover:bg-stone-900/30 transition-colors"
                       >
                         <div className="space-y-0.5">

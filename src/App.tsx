@@ -108,7 +108,10 @@ export default function App() {
           menuCollectionRef,
           (liveSnapshot) => {
             // Live snapshot maps docs directly; if empty, sets empty array []
-            const items: MenuItem[] = liveSnapshot.docs.map((d) => d.data() as MenuItem);
+            const items: MenuItem[] = liveSnapshot.docs.map((d) => ({
+              ...(d.data() as MenuItem),
+              id: d.id,
+            }));
             setMenuItems(items);
             setIsFirebaseLoaded(true);
           },
@@ -199,16 +202,20 @@ export default function App() {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const liveOrders: CustomerOrder[] = snapshot.docs.map(
-          (docSnap) => docSnap.data() as CustomerOrder
-        );
+        const liveOrders: CustomerOrder[] = snapshot.docs.map((docSnap) => ({
+          ...(docSnap.data() as CustomerOrder),
+          id: docSnap.id,
+        }));
         setOrders(liveOrders);
 
         // Detect new order arrival in real time (excluding initial snapshot load)
         if (!isInitialRun) {
           snapshot.docChanges().forEach((change) => {
             if (change.type === 'added') {
-              const newOrder = change.doc.data() as CustomerOrder;
+              const newOrder = {
+                ...(change.doc.data() as CustomerOrder),
+                id: change.doc.id,
+              };
               const alertMode = localStorage.getItem('butt_order_alert_mode') || 'voice';
 
               if (alertMode === 'voice') {

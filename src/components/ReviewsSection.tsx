@@ -226,9 +226,9 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ menuItems = [] }
 
         {/* Testimonials Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reviews.map((review) => (
+          {reviews.map((review, rIdx) => (
             <div
-              key={review.id}
+              key={review.id || `review-${review.name}-${rIdx}`}
               className="bg-[#13151f] border border-stone-800/90 rounded-2xl p-6 hover:border-amber-500/40 transition-colors flex flex-col justify-between shadow-md group"
             >
               <div>
@@ -411,8 +411,8 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({ menuItems = [] }
                     >
                       <option value="">Select your favorite dish...</option>
                       {menuItems && menuItems.length > 0 ? (
-                        menuItems.map((item) => (
-                          <option key={item.id} value={item.name}>
+                        menuItems.map((item, mIdx) => (
+                          <option key={item.id || `dish-opt-${item.name}-${mIdx}`} value={item.name}>
                             {item.name}
                           </option>
                         ))

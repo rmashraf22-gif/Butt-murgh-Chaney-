@@ -400,9 +400,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   </button>
                 </div>
 
-                {cart.map(({ item, quantity }) => (
+                {cart.map(({ item, quantity }, idx) => (
                   <div
-                    key={item.id}
+                    key={item.id || `cart-${item.name}-${idx}`}
                     className="bg-[#151822] border border-stone-800/90 rounded-xl p-3 flex items-center gap-3"
                   >
                     <img

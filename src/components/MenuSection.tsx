@@ -135,13 +135,13 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {filteredItems.map((item) => {
+            {filteredItems.map((item, idx) => {
               const inCartCount = cartItemsMap[item.id] || 0;
               const isJustAdded = addedItemNotice === item.id;
 
               return (
                 <div
-                  key={item.id}
+                  key={item.id || `dish-${item.name}-${idx}`}
                   className={`group bg-[#13151e] border rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-1 ${
                     item.isAvailable
                       ? 'border-stone-800/90 hover:border-amber-500/40'
